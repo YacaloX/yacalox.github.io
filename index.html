@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>YacaloX | Caos Digital</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --neon-blue: #00d4ff;
+      --neon-purple: #b44dff;
+      --neon-pink: #ff2d95;
+      --dark-bg: #0a0a0f;
+      --darker-bg: #050508;
+      --terminal-green: #0f0;
+      --glitch-red: #ff0040;
+      --glitch-blue: #00d4ff;
+      --scanline-opacity: 0.03;
+    }
+
+    * { scroll-behavior: smooth; box-sizing: border-box; }
+
+    body {
+      background: var(--darker-bg);
+      color: #e0e0e0;
+      font-family: 'Courier New', 'Fira Code', 'Source Code Pro', monospace;
+      overflow-x: hidden;
+      cursor: default;
+      position: relative;
+      margin: 0;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: repeating-linear-gradient(0deg,
+          transparent, transparent 2px,
+          rgba(0, 0, 0, var(--scanline-opacity)) 2px,
+          rgba(0, 0, 0, var(--scanline-opacity)) 4px);
+      pointer-events: none; z-index: 9999; opacity: 0.4;
+    }
+
+    body::after {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: radial-gradient(ellipse at center, transparent 60%, rgba(0, 0, 0, 0.7) 100%);
+      pointer-events: none; z-index: 9998;
+    }
+
+    #particles-canvas {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      z-index: 0; pointer-events: none;
+    }
+
+    .content-wrapper { position: relative; z-index: 1; }
+
+    @keyframes glitch {
+      0%,100% { clip-path: inset(0 0 0 0); transform: translate(0); }
+      5% { clip-path: inset(20% 0 60% 0); transform: translate(-5px, 2px); }
+      10% { clip-path: inset(50% 0 10% 0); transform: translate(5px, -3px); }
+      15% { clip-path: inset(10% 0 70% 0); transform: translate(-3px, -2px); }
+      20% { clip-path: inset(0 0 0 0); transform: translate(0); }
+      25% { clip-path: inset(30% 0 40% 0); transform: translate(4px, 1px); }
+      30% { clip-path: inset(0 0 0 0); transform: translate(0); }
+    }
+
+    @keyframes glitch-skew {
+      0%,100% { transform: skew(0deg); }
+      5% { transform: skew(2deg); }
+      10% { transform: skew(-1deg); }
+      15% { transform: skew(0.5deg); }
+      20% { transform: skew(0deg); }
+    }
+
+    .glitch-text {
+      position: relative; display: inline-block;
+      animation: glitch-skew 0.4s infinite alternate-reverse;
+    }
+    .glitch-text::before, .glitch-text::after {
+      content: attr(data-text);
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    }
+    .glitch-text::before {
+      color: var(--glitch-red); z-index: -1;
+      animation: glitch 0.3s infinite;
+      clip-path: inset(30% 0 50% 0); left: -2px;
+      text-shadow: -2px 0 var(--glitch-red);
+    }
+    .glitch-text::after {
+      color: var(--glitch-blue); z-index: -2;
+      animation: glitch 0.3s infinite reverse;
+      clip-path: inset(60% 0 20% 0); left: 2px;
+      text-shadow: 2px 0 var(--glitch-blue);
+    }
+
+    .neon-glow-blue { text-shadow: 0 0 5px var(--neon-blue), 0 0 10px var(--neon-blue), 0 0 20px var(--neon-blue), 0 0 40px var(--neon-blue), 0 0 80px var(--neon-blue); }
+    .neon-glow-purple { text-shadow: 0 0 5px var(--neon-purple), 0 0 10px var(--neon-purple), 0 0 20px var(--neon-purple), 0 0 40px var(--neon-purple); }
+    .neon-glow-pink { text-shadow: 0 0 5px var(--neon-pink), 0 0 10px var(--neon-pink), 0 0 20px var(--neon-pink); }
+
+    .border-glow {
+      border: 1px solid rgba(0, 212, 255, 0.3);
+      box-shadow: 0 0 5px rgba(0, 212, 255, 0.2), 0 0 15px rgba(0, 212, 255, 0.1), inset 0 0 5px rgba(0, 212, 255, 0.05);
+      transition: all 0.3s ease;
+    }
+    .border-glow:hover {
+      border-color: rgba(0, 212, 255, 0.7);
+      box-shadow: 0 0 10px rgba(0, 212, 255, 0.4), 0 0 30px rgba(0, 212, 255, 0.2), 0 0 60px rgba(0, 212, 255, 0.1), inset 0 0 10px rgba(0, 212, 255, 0.1);
+    }
+    .border-glow-purple {
+      border: 1px solid rgba(180, 77, 255, 0.3);
+      box-shadow: 0 0 5px rgba(180, 77, 255, 0.2), 0 0 15px rgba(180, 77, 255, 0.1), inset 0 0 5px rgba(180, 77, 255, 0.05);
+      transition: all 0.3s ease;
+    }
+    .border-glow-purple:hover {
+      border-color: rgba(180, 77, 255, 0.7);
+      box-shadow: 0 0 10px rgba(180, 77, 255, 0.4), 0 0 30px rgba(180, 77, 255, 0.2), 0 0 60px rgba(180, 77, 255, 0.1), inset 0 0 10px rgba(180, 77, 255, 0.1);
+    }
+
+    #terminal-body {
+      background: rgba(0,0,0,0.85);
+      border: 1px solid rgba(0,255,0,0.3);
+      box-shadow: 0 0 20px rgba(0,255,0,0.1), inset 0 0 30px rgba(0,0,0,0.8);
+      font-family: 'Courier New', monospace;
+      position: relative; overflow-y: auto; max-height: 400px;
+    }
+    #terminal-body::before {
+      content: '';
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      background: repeating-linear-gradient(0deg,
+          transparent, transparent 2px,
+          rgba(0,255,0,0.015) 2px, rgba(0,255,0,0.015) 4px);
+      pointer-events: none; z-index: 2;
+    }
+    #terminal-output { position: relative; z-index: 1; }
+
+    @keyframes float {
+      0%,100% { transform: translateY(0px); }
+      50% { transform: translateY(-15px); }
+    }
+    .animate-float { animation: float 4s ease-in-out infinite; }
+    .animate-float-delayed { animation: float 4s ease-in-out 1s infinite; }
+    .animate-float-slow { animation: float 6s ease-in-out infinite; }
+
+    @keyframes pulse-glow {
+      0%,100% { box-shadow: 0 0 5px rgba(0,212,255,0.3); }
+      50% { box-shadow: 0 0 25px rgba(0,212,255,0.7), 0 0 50px rgba(0,212,255,0.3); }
+    }
+    .pulse-glow { animation: pulse-glow 2s ease-in-out infinite; }
+
+    @keyframes shake {
+      0%,100% { transform: translateX(0); }
+      10% { transform: translateX(-3px) rotate(-0.5deg); }
+      20% { transform: translateX(3px) rotate(0.5deg); }
+      30% { transform: translateX(-2px); }
+      40% { transform: translateX(2px); }
+      50% { transform: translateX(-1px); }
+      60% { transform: translateX(1px); }
+      70% { transform: translateX(0); }
+    }
+    .shake-on-hover:hover { animation: shake 0.5s ease-in-out; }
+
+    @keyframes fill-bar { from { width: 0%; } }
+    .animate-fill-bar { animation: fill-bar 1.8s ease-out forwards; }
+
+    .card-3d { perspective: 1000px; transform-style: preserve-3d; transition: transform 0.1s ease-out; }
+
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--darker-bg); }
+    ::-webkit-scrollbar-thumb { background: var(--neon-blue); border-radius: 3px; box-shadow: 0 0 10px var(--neon-blue); }
+    ::-webkit-scrollbar-thumb:hover { background: var(--neon-purple); box-shadow: 0 0 15px var(--neon-purple); }
+
+    @media (max-width: 768px) {
+      .glitch-text { font-size: 3.5rem !important; }
+      #terminal-body { max-height: 350px; }
+    }
+    @media (max-width: 480px) {
+      .glitch-text { font-size: 2.5rem !important; }
+    }
+  </style>
+</head>
+<body class="bg-[#050508] text-gray-200">
+
+  <canvas id="particles-canvas"></canvas>
+
+  <header class="fixed top-0 left-0 w-full z-50 bg-black/70 backdrop-blur-md border-b border-[var(--neon-blue)]/20 px-4 py-3 flex items-center justify-between">
+    <div class="flex items-center gap-2">
+      <div class="w-10 h-10 rounded-full border-2 border-[var(--neon-purple)] bg-black flex items-center justify-center shadow-[0_0_15px_rgba(180,77,255,0.6)] overflow-hidden">
+        <span class="text-xl">💀</span>
+      </div>
+      <span class="text-lg font-bold text-[var(--neon-blue)] neon-glow-blue font-mono tracking-wider hidden sm:inline">YacaloX</span>
+    </div>
+
+    <div class="flex items-center gap-3 flex-wrap">
+      <button onclick="scrollToSection('proyectos')" class="text-xs text-[var(--neon-blue)] hover:text-white transition font-mono border border-[var(--neon-blue)]/30 px-3 py-1 rounded hover:bg-[var(--neon-blue)]/10">
+        🚀 Proyectos
+      </button>
+      <button onclick="scrollToSection('terminal-section')" class="text-xs text-[var(--neon-purple)] hover:text-white transition font-mono border border-[var(--neon-purple)]/30 px-3 py-1 rounded hover:bg-[var(--neon-purple)]/10">
+        💻 Terminal
+      </button>
+      <button onclick="showEmpanadaAlert()" class="text-xs text-[var(--neon-pink)] hover:text-white transition font-mono border border-[var(--neon-pink)]/30 px-3 py-1 rounded hover:bg-[var(--neon-pink)]/10 flex items-center gap-1">
+        🥟 Empanada
+      </button>
+    </div>
+  </header>
+
+  <div class="content-wrapper relative z-10">
+
+    <section id="hero" class="min-h-screen flex flex-col items-center justify-center relative px-4 pt-28 pb-20">
+      <div class="absolute top-10 left-10 text-[var(--neon-blue)] opacity-40 text-6xl hidden lg:block">╔═══</div>
+      <div class="absolute top-10 right-10 text-[var(--neon-blue)] opacity-40 text-6xl hidden lg:block">═══╗</div>
+      <div class="absolute bottom-10 left-10 text-[var(--neon-blue)] opacity-40 text-6xl hidden lg:block">╚═══</div>
+      <div class="absolute bottom-10 right-10 text-[var(--neon-blue)] opacity-40 text-6xl hidden lg:block">═══╝</div>
+
+      <div class="absolute top-6 right-6 flex items-center gap-2 bg-black/60 border border-[var(--neon-blue)]/30 rounded-full px-4 py-2 z-20 pulse-glow">
+        <span class="w-2.5 h-2.5 bg-green-500 rounded-full animate-pulse shadow-[0_0_10px_#0f0]"></span>
+        <span class="text-xs text-[var(--neon-blue)] tracking-wider">CAOS ESTABLE</span>
+      </div>
+
+      <div class="absolute top-6 left-6 text-xs text-[var(--neon-blue)]/50 hidden md:block z-20 font-mono">
+        <div>> system.boot :: OK</div>
+        <div>> chaos.daemon :: RUNNING</div>
+        <div>> sanity.check :: SKIPPED</div>
+        <div>> coffee.level :: CRITICAL</div>
+      </div>
+
+      <div class="relative mb-6 z-10">
+        <h1 class="glitch-text text-7xl md:text-9xl lg:text-[10rem] font-bold text-white neon-glow-blue tracking-tighter select-none"
+            data-text="YacaloX" style="font-family: 'Courier New', monospace; letter-spacing: -0.05em;">
+          YacaloX
+        </h1>
+        <h1 class="absolute top-1 left-1 text-7xl md:text-9xl lg:text-[10rem] font-bold text-[var(--neon-purple)]/30 tracking-tighter select-none -z-10 blur-sm"
+            style="font-family: 'Courier New', monospace; letter-spacing: -0.05em;">
+          YacaloX
+        </h1>
+      </div>
+
+      <div class="text-center space-y-3 z-10 mb-8">
+        <p class="text-lg md:text-xl text-[var(--neon-blue)] neon-glow-blue tracking-widest font-mono">
+          ⚡ INGENIERO DEL CAOS DIGITAL ⚡
+        </p>
+        <p class="text-sm md:text-base text-gray-400 italic font-mono">
+          « Creador de software cursed™ &nbsp;|&nbsp; Hago que las IAs peleen entre ellas por diversión »
+        </p>
+        <p class="text-xs text-[var(--neon-pink)]/70 font-mono animate-pulse">
+          [ WARNING: Este sitio contiene niveles peligrosos de creatividad ]
+        </p>
+      </div>
+
+      <div class="flex flex-wrap gap-4 z-10 justify-center">
+        <button onclick="scrollToSection('proyectos')"
+          class="group relative px-8 py-3 bg-transparent border-2 border-[var(--neon-blue)] text-[var(--neon-blue)] font-mono font-bold rounded overflow-hidden transition-all duration-300 hover:bg-[var(--neon-blue)]/10 hover:shadow-[0_0_30px_rgba(0,212,255,0.5)]">
+          <span class="relative z-10">🚀 VER PROYECTOS</span>
+          <span class="absolute inset-0 bg-[var(--neon-blue)]/10 translate-x-[-100%] group-hover:translate-x-0 transition-transform duration-500"></span>
+        </button>
+        <button onclick="scrollToSection('terminal-section')"
+          class="group relative px-8 py-3 bg-transparent border-2 border-[var(--neon-purple)] text-[var(--neon-purple)] font-mono font-bold rounded overflow-hidden transition-all duration-300 hover:bg-[var(--neon-purple)]/10 hover:shadow-[0_0_30px_rgba(180,77,255,0.5)]">
+          <span class="relative z-10">💻 TERMINAL</span>
+          <span class="absolute inset-0 bg-[var(--neon-purple)]/10 translate-x-[-100%] group-hover:translate-x-0 transition-transform duration-500"></span>
+        </button>
+        <button onclick="showDoNotPressAlert()"
+          class="group relative px-8 py-3 bg-transparent border-2 border-[var(--neon-pink)] text-[var(--neon-pink)] font-mono font-bold rounded overflow-hidden transition-all duration-300 hover:bg-red-900/20 hover:shadow-[0_0_30px_rgba(255,45,149,0.5)] shake-on-hover">
+          <span class="relative z-10">⚠️ DO NOT PRESS</span>
+          <span class="absolute inset-0 bg-red-500/5 animate-pulse"></span>
+        </button>
+      </div>
+
+      <div class="absolute top-1/4 left-[10%] w-2 h-2 bg-[var(--neon-blue)] rounded-full animate-float opacity-60 hidden md:block shadow-[0_0_15px_var(--neon-blue)]"></div>
+      <div class="absolute top-1/3 right-[15%] w-3 h-3 bg-[var(--neon-purple)] rounded-full animate-float-delayed opacity-60 hidden md:block shadow-[0_0_15px_var(--neon-purple)]"></div>
+      <div class="absolute bottom-1/4 left-[20%] w-1.5 h-1.5 bg-[var(--neon-pink)] rounded-full animate-float-slow opacity-50 hidden md:block shadow-[0_0_10px_var(--neon-pink)]"></div>
+      <div class="absolute top-1/2 right-[8%] text-3xl animate-float-slow opacity-70 hidden md:block cursor-pointer select-none" onclick="showFloatingEmpanadaAlert()">🥟</div>
+    </section>
+
+    <section id="sobre-mi" class="py-20 px-4 md:px-10 lg:px-20 relative">
+      <div class="max-w-5xl mx-auto">
+        <div class="flex items-center gap-4 mb-12">
+          <span class="text-[var(--neon-blue)] text-3xl font-mono">[</span>
+          <h2 class="text-3xl md:text-4xl font-bold text-white neon-glow-blue font-mono tracking-wide">SOBRE_MÍ</h2>
+          <span class="text-[var(--neon-blue)] text-3xl font-mono">]</span>
+          <div class="flex-1 h-px bg-gradient-to-r from-[var(--neon-blue)] to-transparent ml-4"></div>
+        </div>
+        <div class="grid md:grid-cols-2 gap-8 items-center">
+          <div class="space-y-6 border-glow rounded-lg p-6 bg-black/40 backdrop-blur-sm">
+            <div class="flex items-start gap-3"><span class="text-[var(--neon-blue)] font-mono text-xl mt-1">></span><p class="text-gray-300 font-mono leading-relaxed">Programador en <span class="text-[var(--neon-blue)]">Python</span> con una obsesión insana por la automatización, las IAs locales y los proyectos que nadie pidió pero todos necesitan.</p></div>
+            <div class="flex items-start gap-3"><span class="text-[var(--neon-purple)] font-mono text-xl mt-1">></span><p class="text-gray-300 font-mono leading-relaxed">Creo <span class="text-[var(--neon-purple)]">bots multiagente</span> con <span class="text-[var(--neon-blue)]">Ollama</span> que hablan entre ellos, se insultan y a veces hasta colaboran.</p></div>
+            <div class="flex items-start gap-3"><span class="text-[var(--neon-pink)] font-mono text-xl mt-1">></span><p class="text-gray-300 font-mono leading-relaxed">Modifico <span class="text-[var(--neon-pink)]">Minecraft</span>, resucito hardware viejo, y convierto cafeteras en servidores. Si algo funciona perfecto, le meto un bug para que tenga personalidad.</p></div>
+            <div class="flex flex-wrap gap-2 pt-4">
+              <span class="px-3 py-1 text-xs font-mono bg-[var(--neon-blue)]/10 border border-[var(--neon-blue)]/30 rounded-full text-[var(--neon-blue)]">Python</span>
+              <span class="px-3 py-1 text-xs font-mono bg-[var(--neon-purple)]/10 border border-[var(--neon-purple)]/30 rounded-full text-[var(--neon-purple)]">Ollama</span>
+              <span class="px-3 py-1 text-xs font-mono bg-[var(--neon-pink)]/10 border border-[var(--neon-pink)]/30 rounded-full text-[var(--neon-pink)]">IA Local</span>
+              <span class="px-3 py-1 text-xs font-mono bg-green-500/10 border border-green-500/30 rounded-full text-green-400">Linux</span>
+              <span class="px-3 py-1 text-xs font-mono bg-yellow-500/10 border border-yellow-500/30 rounded-full text-yellow-400">Bots</span>
+              <span class="px-3 py-1 text-xs font-mono bg-orange-500/10 border border-orange-500/30 rounded-full text-orange-400">Minecraft Mods</span>
+              <span class="px-3 py-1 text-xs font-mono bg-red-500/10 border border-red-500/30 rounded-full text-red-400">Hardware Raro</span>
+            </div>
+          </div>
+          <div class="border-glow-purple rounded-lg p-6 bg-black/40 backdrop-blur-sm font-mono text-xs md:text-sm text-[var(--neon-purple)]/70 leading-tight overflow-hidden">
+            <pre class="select-none">
+        ╔════════════════════════════════╗
+        ║    ▄▄▄▄▄▄▄   ▄▄▄▄▄▄▄          ║
+        ║    █ YacaloX █                ║
+        ║    █▓▓▓▓▓▓▓▓█                 ║
+        ║    █  CAOS  █                 ║
+        ║    ▀▀▀▀▀▀▀▀▀ ▀▀▀▀▀▀▀▀         ║
+        ╠════════════════════════════════╣
+        ║ CPU TEMP: 8000°C (Kinda cold) ║
+        ║ CPU:    [████████░░]  82%     ║
+        ║ RAM:    [██████████]  97%     ║
+        ║ CAOS:   [██████████]   ∞%     ║
+        ║ SANITY: [██░░░░░░░░]   0%     ║
+        ║ STATUS: Functional (?)        ║
+        ╚════════════════════════════════╝
+            </pre>
+            <p class="text-[var(--neon-blue)]/60 text-xs mt-3 text-center italic">« Mi PC tiene más traumas que yo »</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="proyectos" class="py-20 px-4 md:px-10 lg:px-20 relative">
+      <div class="max-w-6xl mx-auto">
+        <div class="flex items-center gap-4 mb-12">
+          <span class="text-[var(--neon-purple)] text-3xl font-mono">{</span>
+          <h2 class="text-3xl md:text-4xl font-bold text-white neon-glow-purple font-mono tracking-wide">PROYECTOS</h2>
+          <span class="text-[var(--neon-purple)] text-3xl font-mono">}</span>
+          <div class="flex-1 h-px bg-gradient-to-r from-[var(--neon-purple)] to-transparent ml-4"></div>
+        </div>
+        <div class="grid md:grid-cols-3 gap-6">
+          <div class="card-3d group border-glow rounded-xl p-6 bg-black/50 backdrop-blur-sm cursor-pointer transition-all duration-300 hover:-translate-y-2 relative overflow-hidden" onmousemove="tiltCard(this, event)" onmouseleave="resetTilt(this)">
+            <div class="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-[var(--neon-blue)] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            <div class="text-4xl mb-3">🤖</div><h3 class="text-xl font-bold text-white mb-2">Chaos WA Ultimate</h3><p class="text-gray-400 text-sm mb-4">Automatización de WhatsApp con respuestas aleatorias, stickers cursed y función de auto-sabotaje.</p>
+            <div class="flex gap-2 flex-wrap"><span class="px-2 py-0.5 text-xs bg-[var(--neon-blue)]/10 text-[var(--neon-blue)] rounded">Python</span><span class="px-2 py-0.5 text-xs bg-[var(--neon-purple)]/10 text-[var(--neon-purple)] rounded">Selenium</span></div>
+            <button onclick="showDoNotPressAlert()" class="mt-4 w-full py-2 border border-[var(--neon-pink)]/50 text-[var(--neon-pink)] rounded font-mono text-sm hover:bg-[var(--neon-pink)]/10 transition-colors">DO NOT PRESS</button>
+            <div class="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-[var(--neon-purple)] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+          </div>
+          <div class="card-3d group border-glow rounded-xl p-6 bg-black/50 backdrop-blur-sm cursor-pointer transition-all duration-300 hover:-translate-y-2 relative overflow-hidden" onmousemove="tiltCard(this, event)" onmouseleave="resetTilt(this)">
+            <div class="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-[var(--neon-purple)] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            <div class="text-4xl mb-3">🧠</div><h3 class="text-xl font-bold text-white mb-2">Bots Multiagente</h3><p class="text-gray-400 text-sm mb-4">Sistema donde varias IAs locales debaten, se insultan y resuelven problemas… o los crean.</p>
+            <div class="flex gap-2 flex-wrap"><span class="px-2 py-0.5 text-xs bg-[var(--neon-purple)]/10 text-[var(--neon-purple)] rounded">Ollama</span><span class="px-2 py-0.5 text-xs bg-green-500/10 text-green-400 rounded">LangChain</span></div>
+            <button onclick="showDoNotPressAlert()" class="mt-4 w-full py-2 border border-[var(--neon-pink)]/50 text-[var(--neon-pink)] rounded font-mono text-sm hover:bg-[var(--neon-pink)]/10 transition-colors">DO NOT PRESS</button>
+            <div class="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-[var(--neon-blue)] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+          </div>
+          <div class="card-3d group border-glow rounded-xl p-6 bg-black/50 backdrop-blur-sm cursor-pointer transition-all duration-300 hover:-translate-y-2 relative overflow-hidden" onmousemove="tiltCard(this, event)" onmouseleave="resetTilt(this)">
+            <div class="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-[var(--neon-pink)] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            <div class="text-4xl mb-3">⛏️</div><h3 class="text-xl font-bold text-white mb-2">Mods de Minecraft</h3><p class="text-gray-400 text-sm mb-4">Mods que añaden bloques malditos, mobs con crisis existenciales y crafteos que no deberían existir.</p>
+            <div class="flex gap-2 flex-wrap"><span class="px-2 py-0.5 text-xs bg-orange-500/10 text-orange-400 rounded">Java</span><span class="px-2 py-0.5 text-xs bg-red-500/10 text-red-400 rounded">Forge</span></div>
+            <button onclick="showDoNotPressAlert()" class="mt-4 w-full py-2 border border-[var(--neon-pink)]/50 text-[var(--neon-pink)] rounded font-mono text-sm hover:bg-[var(--neon-pink)]/10 transition-colors">DO NOT PRESS</button>
+            <div class="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-[var(--neon-purple)] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="terminal-section" class="py-20 px-4 md:px-10 lg:px-20 relative">
+      <div class="max-w-4xl mx-auto">
+        <div class="flex items-center gap-4 mb-8">
+          <span class="text-green-400 text-3xl font-mono">></span>
+          <h2 class="text-3xl md:text-4xl font-bold text-green-400 font-mono tracking-wide">TERMINAL</h2>
+          <div class="flex-1 h-px bg-gradient-to-r from-green-400 to-transparent ml-4"></div>
+        </div>
+        <div id="terminal-body" class="rounded-lg p-4 text-green-300 text-sm md:text-base overflow-y-auto h-80 flex flex-col">
+          <div id="terminal-output" class="flex-1 space-y-1">
+            <p>> Bienvenido a la terminal del caos. Escribe <span class="text-white">help</span> para comandos.</p>
+          </div>
+          <div class="flex items-center mt-2">
+            <span class="text-green-400 mr-2">❯</span>
+            <input type="text" id="terminal-input" class="flex-1 bg-transparent outline-none text-green-300 font-mono" placeholder="Escribe un comando...">
+          </div>
+        </div>
+        <p class="text-xs text-gray-500 mt-2 font-mono">Comandos: whoami, projects, chaos, insanity, github, coffee, help, clear</p>
+      </div>
+    </section>
+
+    <section id="estadisticas" class="py-20 px-4 md:px-10 lg:px-20 relative">
+      <div class="max-w-5xl mx-auto">
+        <div class="flex items-center gap-4 mb-12">
+          <span class="text-[var(--neon-pink)] text-3xl font-mono">📊</span>
+          <h2 class="text-3xl md:text-4xl font-bold text-white neon-glow-pink font-mono tracking-wide">STATS_CAÓTICAS</h2>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div class="border-glow p-5 rounded-lg bg-black/40"><p class="text-sm text-[var(--neon-blue)] mb-2">NIVEL DE CAOS</p><div class="w-full bg-gray-800 rounded-full h-3 overflow-hidden"><div class="bg-gradient-to-r from-[var(--neon-blue)] to-[var(--neon-purple)] h-full rounded-full animate-fill-bar" style="width: 97%;"></div></div><p class="text-right text-xs mt-1 text-gray-400">97% (peligroso)</p></div>
+          <div class="border-glow p-5 rounded-lg bg-black/40"><p class="text-sm text-[var(--neon-purple)] mb-2">BOTS TRAUMADOS</p><div class="text-4xl font-bold text-white">47</div><p class="text-xs text-gray-400">y contando...</p></div>
+          <div class="border-glow p-5 rounded-lg bg-black/40"><p class="text-sm text-[var(--neon-pink)] mb-2">HORAS SIN DORMIR</p><div class="text-4xl font-bold text-white">128</div><p class="text-xs text-gray-400">récord actual</p></div>
+          <div class="border-glow p-5 rounded-lg bg-black/40"><p class="text-sm text-yellow-400 mb-2">ERRORES PROVOCADOS</p><div class="w-full bg-gray-800 rounded-full h-3 overflow-hidden"><div class="bg-yellow-400 h-full rounded-full animate-fill-bar" style="width: 89%;"></div></div><p class="text-right text-xs mt-1 text-gray-400">89% intencionados</p></div>
+          <div class="border-glow p-5 rounded-lg bg-black/40"><p class="text-sm text-red-400 mb-2">PROBABILIDAD DE EXPLOTAR WINDOWS</p><div class="text-4xl font-bold text-red-400">73%</div><p class="text-xs text-gray-400">si ejecutas mis scripts</p></div>
+          <div class="border-glow p-5 rounded-lg bg-black/40"><p class="text-sm text-green-400 mb-2">CAFÉ CONSUMIDO</p><div class="text-4xl font-bold text-green-400">∞</div><p class="text-xs text-gray-400">litros (estimado)</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="galeria" class="py-20 px-4 md:px-10 lg:px-20 relative">
+      <div class="max-w-6xl mx-auto">
+        <div class="flex items-center gap-4 mb-12">
+          <span class="text-[var(--neon-blue)] text-3xl font-mono">🖥️</span>
+          <h2 class="text-3xl md:text-4xl font-bold text-white neon-glow-blue font-mono tracking-wide">SETUP / HARDWARE</h2>
+        </div>
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div class="border-glow rounded-lg p-4 bg-black/40 flex flex-col items-center text-center hover:scale-105 transition-transform"><div class="text-4xl mb-2">🗄️</div><p class="text-xs text-gray-300">HP ProLiant ML110 G6</p><span class="text-[var(--neon-blue)] text-xs">Xeon jurásico funcionando por odio puro</span></div>
+          <div class="border-glow rounded-lg p-4 bg-black/40 flex flex-col items-center text-center hover:scale-105 transition-transform"><div class="text-4xl mb-2">💾</div><p class="text-xs text-gray-300">Disco duro sospechoso</p><span class="text-[var(--neon-purple)] text-xs">Hace sonidos pero sigue vivo</span></div>
+          <div class="border-glow rounded-lg p-4 bg-black/40 flex flex-col items-center text-center hover:scale-105 transition-transform"><div class="text-4xl mb-2">🧠</div><p class="text-xs text-gray-300">Ollama Server</p><span class="text-[var(--neon-pink)] text-xs">Las IAs pelean aquí adentro</span></div>
+          <div class="border-glow rounded-lg p-4 bg-black/40 flex flex-col items-center text-center hover:scale-105 transition-transform"><div class="text-4xl mb-2">❄️</div><p class="text-xs text-gray-300">Refrigeración avanzada</p><span class="text-[var(--neon-blue)] text-xs">Ventilador encontrado en la calle</span></div>
+          <div class="border-glow rounded-lg p-4 bg-black/40 flex flex-col items-center text-center hover:scale-105 transition-transform"><div class="text-4xl mb-2">📺</div><p class="text-xs text-gray-300">Monitor secundario</p><span class="text-[var(--neon-purple)] text-xs">1366x768 de pura humildad</span></div>
+          <div class="border-glow rounded-lg p-4 bg-black/40 flex flex-col items-center text-center hover:scale-105 transition-transform"><div class="text-4xl mb-2">☕</div><p class="text-xs text-gray-300">Café industrial</p><span class="text-[var(--neon-pink)] text-xs">Refrigerante oficial del sistema</span></div>
+          <div class="border-glow rounded-lg p-4 bg-black/40 flex flex-col items-center text-center hover:scale-105 transition-transform"><div class="text-4xl mb-2">🔌</div><p class="text-xs text-gray-300">Cable Management</p><span class="text-[var(--neon-blue)] text-xs">Entidad cósmica incomprensible</span></div>
+          <div class="border-glow rounded-lg p-4 bg-black/40 flex flex-col items-center text-center hover:scale-105 transition-transform"><div class="text-4xl mb-2">🔥</div><p class="text-xs text-gray-300">CPU TEMP</p><span class="text-[var(--neon-purple)] text-xs">8000°C (Kinda cold)</span></div>
+        </div>
+      </div>
+    </section>
+
+    <footer class="py-12 border-t border-[var(--neon-blue)]/20 text-center relative">
+      <p class="text-xl font-mono text-[var(--neon-blue)] neon-glow-blue">« Si no explotó, le falta personalidad. »</p>
+      <p class="text-sm text-gray-500 mt-2">Powered by caos y café. © YacaloX 2025</p>
+      <div class="mt-4 text-xs text-gray-600 font-mono">
+        [ system.uptime: 127h 33m | chaos.level: acceptable | sanity: not found ]
+      </div>
+      <div class="mt-2 cursor-pointer select-none" onclick="alert('🥚 Easter Egg: ¡Has encontrado el caos supremo! Escribe "coffee" en la terminal.')">🔍</div>
+    </footer>
+  </div>
+
+  <script>
+    // Funciones para los alerts (evita escapes problemáticos en el HTML)
+    function showEmpanadaAlert() {
+      alert('🥟 ¡EMPANADA DE CAOS!\n\nRellena de código picante, queso cuántico y carne de bug.\n\n¿Desea ordenar? (sí/no)\n> ERROR: Pedido excede límites de realidad.');
+    }
+    function showDoNotPressAlert() {
+      alert('🛑 ¡ERROR!\n\nEste botón no debería existir.\nEl universo acaba de dividirse en dos realidades paralelas.\nEn una de ellas, hiciste clic. En la otra, no.\n\nAmbas están decepcionadas.');
+    }
+    function showFloatingEmpanadaAlert() {
+      alert('🥟 Empanada cósmica flotante. Contiene caos puro.');
+    }
+    function scrollToSection(id) {
+      document.getElementById(id).scrollIntoView({behavior:'smooth'});
+    }
+
+    // Partículas
+    (function() {
+      const canvas = document.getElementById('particles-canvas');
+      const ctx = canvas.getContext('2d');
+      let width, height, particles = [];
+      const columns = Math.floor(window.innerWidth / 20) + 1;
+
+      function resize() {
+        width = window.innerWidth;
+        height = window.innerHeight;
+        canvas.width = width;
+        canvas.height = height;
+        initParticles();
+      }
+      function initParticles() {
+        particles = [];
+        for (let i = 0; i < columns; i++) {
+          particles.push({
+            x: i * 20 + Math.random() * 10,
+            y: Math.random() * height,
+            speed: 1 + Math.random() * 3,
+            chars: '01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン'.split(''),
+            char: '',
+            opacity: Math.random() * 0.5 + 0.2
+          });
+        }
+      }
+      function drawParticles() {
+        ctx.clearRect(0, 0, width, height);
+        ctx.font = '14px monospace';
+        particles.forEach(p => {
+          p.char = p.chars[Math.floor(Math.random() * p.chars.length)];
+          ctx.fillStyle = `rgba(0, 212, 255, ${p.opacity})`;
+          ctx.fillText(p.char, p.x, p.y);
+          p.y += p.speed;
+          if (p.y > height) {
+            p.y = -10;
+            p.x = (Math.floor(Math.random() * columns)) * 20 + Math.random() * 10;
+          }
+        });
+        requestAnimationFrame(drawParticles);
+      }
+      window.addEventListener('resize', resize);
+      resize();
+      drawParticles();
+    })();
+
+    // Tilt 3D
+    window.tiltCard = function(card, event) {
+      const rect = card.getBoundingClientRect();
+      const x = event.clientX - rect.left;
+      const y = event.clientY - rect.top;
+      const rotateX = ((y - rect.height/2) / (rect.height/2)) * -8;
+      const rotateY = ((x - rect.width/2) / (rect.width/2)) * 8;
+      card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02,1.02,1.02)`;
+    };
+    window.resetTilt = function(card) {
+      card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1,1,1)';
+    };
+
+    // Terminal
+    const termOut = document.getElementById('terminal-output');
+    const termIn = document.getElementById('terminal-input');
+    const cmds = {
+      help: () => 'Comandos: whoami, projects, chaos, insanity, github, coffee, clear, status',
+      whoami: () => 'Eres YacaloX, ingeniero del caos digital. O al menos eso dice el sistema.',
+      projects: () => 'Proyectos activos: Chaos WA Ultimate, Bots multiagente, Mods de Minecraft (todos en estado "funciona, pero no preguntes cómo").',
+      chaos: () => 'Nivel de caos actual: 97%. Recomendación: no tocar nada.',
+      insanity: () => 'Modo locura activado. Las IAs están debatiendo sobre la existencia del pollo frito.',
+      github: () => 'Repositorio: github.com/YacaloX (tal vez exista, tal vez no).',
+      coffee: () => '☕ ¡Café detectado! Recargando energía... (mentira, nunca es suficiente).',
+      status: () => 'Sistema: operativo. Caos: estable. Café: crítico. Sueño: ausente.',
+      clear: () => { termOut.innerHTML = ''; return ''; }
+    };
+    function addLine(txt, cls = 'text-green-300') {
+      const p = document.createElement('p');
+      p.className = cls;
+      p.textContent = txt;
+      termOut.appendChild(p);
+      termOut.parentElement.scrollTop = termOut.parentElement.scrollHeight;
+    }
+    termIn.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        const cmd = this.value.trim().toLowerCase();
+        if (!cmd) return;
+        addLine(`❯ ${cmd}`, 'text-white');
+        if (cmds[cmd]) {
+          const res = cmds[cmd]();
+          if (res) addLine(res);
+        } else {
+          addLine(`Comando no reconocido: ${cmd}. Prueba "help".`, 'text-red-400');
+        }
+        this.value = '';
+      }
+    });
+  </script>
+</body>
+</html>
