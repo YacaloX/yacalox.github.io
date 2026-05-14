@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
   <title>YacaloX | Caos Digital</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
@@ -10,16 +10,20 @@
       --neon-blue: #00d4ff;
       --neon-purple: #b44dff;
       --neon-pink: #ff2d95;
+      --neon-yellow: #fcf259;
       --dark-bg: #0a0a0f;
       --darker-bg: #050508;
       --terminal-green: #0f0;
       --glitch-red: #ff0040;
       --glitch-blue: #00d4ff;
-      --neon-yellow: #fcf259
       --scanline-opacity: 0.03;
     }
 
-    * { scroll-behavior: smooth; box-sizing: border-box; }
+    * {
+      scroll-behavior: smooth;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
 
     body {
       background: var(--darker-bg);
@@ -29,155 +33,426 @@
       cursor: default;
       position: relative;
       margin: 0;
+      -webkit-font-smoothing: antialiased;
+      touch-action: manipulation;
     }
 
     body::before {
       content: '';
       position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
       background: repeating-linear-gradient(0deg,
           transparent, transparent 2px,
           rgba(0, 0, 0, var(--scanline-opacity)) 2px,
           rgba(0, 0, 0, var(--scanline-opacity)) 4px);
-      pointer-events: none; z-index: 9999; opacity: 0.4;
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0.4;
     }
 
     body::after {
       content: '';
       position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
       background: radial-gradient(ellipse at center, transparent 60%, rgba(0, 0, 0, 0.7) 100%);
-      pointer-events: none; z-index: 9998;
+      pointer-events: none;
+      z-index: 9998;
     }
 
     #particles-canvas {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      z-index: 0; pointer-events: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0.8;
     }
 
-    .content-wrapper { position: relative; z-index: 1; }
+    .content-wrapper {
+      position: relative;
+      z-index: 1;
+    }
 
     @keyframes glitch {
-      0%,100% { clip-path: inset(0 0 0 0); transform: translate(0); }
-      5% { clip-path: inset(20% 0 60% 0); transform: translate(-5px, 2px); }
-      10% { clip-path: inset(50% 0 10% 0); transform: translate(5px, -3px); }
-      15% { clip-path: inset(10% 0 70% 0); transform: translate(-3px, -2px); }
-      20% { clip-path: inset(0 0 0 0); transform: translate(0); }
-      25% { clip-path: inset(30% 0 40% 0); transform: translate(4px, 1px); }
-      30% { clip-path: inset(0 0 0 0); transform: translate(0); }
+      0%,
+      100% {
+        clip-path: inset(0 0 0 0);
+        transform: translate(0);
+      }
+      5% {
+        clip-path: inset(20% 0 60% 0);
+        transform: translate(-5px, 2px);
+      }
+      10% {
+        clip-path: inset(50% 0 10% 0);
+        transform: translate(5px, -3px);
+      }
+      15% {
+        clip-path: inset(10% 0 70% 0);
+        transform: translate(-3px, -2px);
+      }
+      20% {
+        clip-path: inset(0 0 0 0);
+        transform: translate(0);
+      }
+      25% {
+        clip-path: inset(30% 0 40% 0);
+        transform: translate(4px, 1px);
+      }
+      30% {
+        clip-path: inset(0 0 0 0);
+        transform: translate(0);
+      }
     }
 
     @keyframes glitch-skew {
-      0%,100% { transform: skew(0deg); }
-      5% { transform: skew(2deg); }
-      10% { transform: skew(-1deg); }
-      15% { transform: skew(0.5deg); }
-      20% { transform: skew(0deg); }
+      0%,
+      100% {
+        transform: skew(0deg);
+      }
+      5% {
+        transform: skew(2deg);
+      }
+      10% {
+        transform: skew(-1deg);
+      }
+      15% {
+        transform: skew(0.5deg);
+      }
+      20% {
+        transform: skew(0deg);
+      }
     }
 
     .glitch-text {
-      position: relative; display: inline-block;
+      position: relative;
+      display: inline-block;
       animation: glitch-skew 0.4s infinite alternate-reverse;
+      word-break: break-word;
     }
-    .glitch-text::before, .glitch-text::after {
+
+    .glitch-text::before,
+    .glitch-text::after {
       content: attr(data-text);
-      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
     }
+
     .glitch-text::before {
-      color: var(--glitch-red); z-index: -1;
+      color: var(--glitch-red);
+      z-index: -1;
       animation: glitch 0.3s infinite;
-      clip-path: inset(30% 0 50% 0); left: -2px;
+      clip-path: inset(30% 0 50% 0);
+      left: -2px;
       text-shadow: -2px 0 var(--glitch-red);
     }
+
     .glitch-text::after {
-      color: var(--glitch-blue); z-index: -2;
+      color: var(--glitch-blue);
+      z-index: -2;
       animation: glitch 0.3s infinite reverse;
-      clip-path: inset(60% 0 20% 0); left: 2px;
+      clip-path: inset(60% 0 20% 0);
+      left: 2px;
       text-shadow: 2px 0 var(--glitch-blue);
     }
 
-    .neon-glow-blue { text-shadow: 0 0 5px var(--neon-blue), 0 0 10px var(--neon-blue), 0 0 20px var(--neon-blue), 0 0 40px var(--neon-blue), 0 0 80px var(--neon-blue); }
-    .neon-glow-purple { text-shadow: 0 0 5px var(--neon-purple), 0 0 10px var(--neon-purple), 0 0 20px var(--neon-purple), 0 0 40px var(--neon-purple); }
-    .neon-glow-pink { text-shadow: 0 0 5px var(--neon-pink), 0 0 10px var(--neon-pink), 0 0 20px var(--neon-pink); }
+    .neon-glow-blue {
+      text-shadow: 0 0 5px var(--neon-blue), 0 0 10px var(--neon-blue), 0 0 20px var(--neon-blue), 0 0 40px var(--neon-blue), 0 0 80px var(--neon-blue);
+    }
+
+    .neon-glow-purple {
+      text-shadow: 0 0 5px var(--neon-purple), 0 0 10px var(--neon-purple), 0 0 20px var(--neon-purple), 0 0 40px var(--neon-purple);
+    }
+
+    .neon-glow-pink {
+      text-shadow: 0 0 5px var(--neon-pink), 0 0 10px var(--neon-pink), 0 0 20px var(--neon-pink);
+    }
 
     .border-glow {
       border: 1px solid rgba(0, 212, 255, 0.3);
       box-shadow: 0 0 5px rgba(0, 212, 255, 0.2), 0 0 15px rgba(0, 212, 255, 0.1), inset 0 0 5px rgba(0, 212, 255, 0.05);
       transition: all 0.3s ease;
     }
+
     .border-glow:hover {
       border-color: rgba(0, 212, 255, 0.7);
       box-shadow: 0 0 10px rgba(0, 212, 255, 0.4), 0 0 30px rgba(0, 212, 255, 0.2), 0 0 60px rgba(0, 212, 255, 0.1), inset 0 0 10px rgba(0, 212, 255, 0.1);
     }
+
     .border-glow-purple {
       border: 1px solid rgba(180, 77, 255, 0.3);
       box-shadow: 0 0 5px rgba(180, 77, 255, 0.2), 0 0 15px rgba(180, 77, 255, 0.1), inset 0 0 5px rgba(180, 77, 255, 0.05);
       transition: all 0.3s ease;
     }
+
     .border-glow-purple:hover {
       border-color: rgba(180, 77, 255, 0.7);
       box-shadow: 0 0 10px rgba(180, 77, 255, 0.4), 0 0 30px rgba(180, 77, 255, 0.2), 0 0 60px rgba(180, 77, 255, 0.1), inset 0 0 10px rgba(180, 77, 255, 0.1);
     }
 
     #terminal-body {
-      background: rgba(0,0,0,0.85);
-      border: 1px solid rgba(0,255,0,0.3);
-      box-shadow: 0 0 20px rgba(0,255,0,0.1), inset 0 0 30px rgba(0,0,0,0.8);
+      background: rgba(0, 0, 0, 0.85);
+      border: 1px solid rgba(0, 255, 0, 0.3);
+      box-shadow: 0 0 20px rgba(0, 255, 0, 0.1), inset 0 0 30px rgba(0, 0, 0, 0.8);
       font-family: 'Courier New', monospace;
-      position: relative; overflow-y: auto; max-height: 400px;
+      position: relative;
+      overflow-y: auto;
+      max-height: 60vh;
+      height: auto;
+      display: flex;
+      flex-direction: column;
     }
+
     #terminal-body::before {
       content: '';
-      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
       background: repeating-linear-gradient(0deg,
           transparent, transparent 2px,
-          rgba(0,255,0,0.015) 2px, rgba(0,255,0,0.015) 4px);
-      pointer-events: none; z-index: 2;
+          rgba(0, 255, 0, 0.015) 2px, rgba(0, 255, 0, 0.015) 4px);
+      pointer-events: none;
+      z-index: 2;
     }
-    #terminal-output { position: relative; z-index: 1; }
+
+    #terminal-output {
+      position: relative;
+      z-index: 1;
+      flex: 1;
+      overflow-y: auto;
+      max-height: calc(60vh - 50px);
+      padding-right: 8px;
+    }
 
     @keyframes float {
-      0%,100% { transform: translateY(0px); }
-      50% { transform: translateY(-15px); }
+      0%,
+      100% {
+        transform: translateY(0px);
+      }
+      50% {
+        transform: translateY(-15px);
+      }
     }
-    .animate-float { animation: float 4s ease-in-out infinite; }
-    .animate-float-delayed { animation: float 4s ease-in-out 1s infinite; }
-    .animate-float-slow { animation: float 6s ease-in-out infinite; }
+
+    .animate-float {
+      animation: float 4s ease-in-out infinite;
+    }
+
+    .animate-float-delayed {
+      animation: float 4s ease-in-out 1s infinite;
+    }
+
+    .animate-float-slow {
+      animation: float 6s ease-in-out infinite;
+    }
 
     @keyframes pulse-glow {
-      0%,100% { box-shadow: 0 0 5px rgba(0,212,255,0.3); }
-      50% { box-shadow: 0 0 25px rgba(0,212,255,0.7), 0 0 50px rgba(0,212,255,0.3); }
+      0%,
+      100% {
+        box-shadow: 0 0 5px rgba(0, 212, 255, 0.3);
+      }
+      50% {
+        box-shadow: 0 0 25px rgba(0, 212, 255, 0.7), 0 0 50px rgba(0, 212, 255, 0.3);
+      }
     }
-    .pulse-glow { animation: pulse-glow 2s ease-in-out infinite; }
+
+    .pulse-glow {
+      animation: pulse-glow 2s ease-in-out infinite;
+    }
 
     @keyframes shake {
-      0%,100% { transform: translateX(0); }
-      10% { transform: translateX(-3px) rotate(-0.5deg); }
-      20% { transform: translateX(3px) rotate(0.5deg); }
-      30% { transform: translateX(-2px); }
-      40% { transform: translateX(2px); }
-      50% { transform: translateX(-1px); }
-      60% { transform: translateX(1px); }
-      70% { transform: translateX(0); }
+      0%,
+      100% {
+        transform: translateX(0);
+      }
+      10% {
+        transform: translateX(-3px) rotate(-0.5deg);
+      }
+      20% {
+        transform: translateX(3px) rotate(0.5deg);
+      }
+      30% {
+        transform: translateX(-2px);
+      }
+      40% {
+        transform: translateX(2px);
+      }
+      50% {
+        transform: translateX(-1px);
+      }
+      60% {
+        transform: translateX(1px);
+      }
+      70% {
+        transform: translateX(0);
+      }
     }
-    .shake-on-hover:hover { animation: shake 0.5s ease-in-out; }
 
-    @keyframes fill-bar { from { width: 0%; } }
-    .animate-fill-bar { animation: fill-bar 1.8s ease-out forwards; }
+    .shake-on-hover:hover {
+      animation: shake 0.5s ease-in-out;
+    }
 
-    .card-3d { perspective: 1000px; transform-style: preserve-3d; transition: transform 0.1s ease-out; }
+    @keyframes fill-bar {
+      from {
+        width: 0%;
+      }
+    }
 
-    ::-webkit-scrollbar { width: 6px; }
-    ::-webkit-scrollbar-track { background: var(--darker-bg); }
-    ::-webkit-scrollbar-thumb { background: var(--neon-blue); border-radius: 3px; box-shadow: 0 0 10px var(--neon-blue); }
-    ::-webkit-scrollbar-thumb:hover { background: var(--neon-purple); box-shadow: 0 0 15px var(--neon-purple); }
+    .animate-fill-bar {
+      animation: fill-bar 1.8s ease-out forwards;
+    }
+
+    .card-3d {
+      perspective: 1000px;
+      transform-style: preserve-3d;
+      transition: transform 0.1s ease-out;
+    }
+
+    /* Estilos del menú móvil */
+    .mobile-menu {
+      display: none;
+      flex-direction: column;
+      position: absolute;
+      top: 100%;
+      right: 0;
+      background: rgba(0, 0, 0, 0.95);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(0, 212, 255, 0.3);
+      border-radius: 8px;
+      padding: 12px;
+      min-width: 200px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+      z-index: 60;
+      gap: 8px;
+    }
+
+    .mobile-menu.open {
+      display: flex;
+    }
+
+    .hamburger-btn {
+      display: none;
+      background: transparent;
+      border: 1px solid rgba(0, 212, 255, 0.3);
+      color: var(--neon-blue);
+      font-size: 1.5rem;
+      cursor: pointer;
+      padding: 6px 12px;
+      border-radius: 6px;
+      transition: all 0.2s;
+      line-height: 1;
+    }
+
+    .hamburger-btn:hover {
+      background: rgba(0, 212, 255, 0.1);
+      box-shadow: 0 0 15px rgba(0, 212, 255, 0.3);
+    }
+
+    .ascii-art {
+      font-size: 0.65rem;
+      line-height: 1.2;
+      white-space: pre;
+      overflow-x: auto;
+      max-width: 100%;
+    }
 
     @media (max-width: 768px) {
-      .glitch-text { font-size: 3.5rem !important; }
-      #terminal-body { max-height: 350px; }
+      .glitch-text {
+        font-size: 3.5rem !important;
+      }
+
+      #terminal-body {
+        max-height: 50vh;
+      }
+
+      #terminal-output {
+        max-height: calc(50vh - 50px);
+      }
+
+      .ascii-art {
+        font-size: 0.5rem;
+      }
+
+      .desktop-nav {
+        display: none !important;
+      }
+
+      .hamburger-btn {
+        display: block;
+      }
+
+      .particle-density {
+        display: none;
+      }
     }
+
     @media (max-width: 480px) {
-      .glitch-text { font-size: 2.5rem !important; }
+      .glitch-text {
+        font-size: 2.5rem !important;
+      }
+
+      #terminal-body {
+        max-height: 45vh;
+      }
+
+      #terminal-output {
+        max-height: calc(45vh - 50px);
+      }
+
+      .ascii-art {
+        font-size: 0.45rem;
+      }
+
+      .hero-buttons {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .hero-buttons button,
+      .hero-buttons a {
+        width: 100%;
+        text-align: center;
+      }
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--darker-bg);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--neon-blue);
+      border-radius: 3px;
+      box-shadow: 0 0 10px var(--neon-blue);
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--neon-purple);
+      box-shadow: 0 0 15px var(--neon-purple);
+    }
+
+    /* Mejoras táctiles */
+    button,
+    a {
+      touch-action: manipulation;
     }
   </style>
 </head>
@@ -185,6 +460,7 @@
 
   <canvas id="particles-canvas"></canvas>
 
+  <!-- Header con menú hamburguesa -->
   <header class="fixed top-0 left-0 w-full z-50 bg-black/70 backdrop-blur-md border-b border-[var(--neon-blue)]/20 px-4 py-3 flex items-center justify-between">
     <div class="flex items-center gap-2">
       <div class="w-10 h-10 rounded-full border-2 border-[var(--neon-purple)] bg-black flex items-center justify-center shadow-[0_0_15px_rgba(180,77,255,0.6)] overflow-hidden">
@@ -193,7 +469,8 @@
       <span class="text-lg font-bold text-[var(--neon-blue)] neon-glow-blue font-mono tracking-wider hidden sm:inline">YacaloX</span>
     </div>
 
-    <div class="flex items-center gap-3 flex-wrap">
+    <!-- Navegación escritorio -->
+    <div class="desktop-nav flex items-center gap-3 flex-wrap">
       <button onclick="scrollToSection('proyectos')" class="text-xs text-[var(--neon-blue)] hover:text-white transition font-mono border border-[var(--neon-blue)]/30 px-3 py-1 rounded hover:bg-[var(--neon-blue)]/10">
         🚀 Proyectos
       </button>
@@ -204,10 +481,35 @@
         🥟 Empanada
       </button>
     </div>
+
+    <!-- Botón hamburguesa (solo móvil) -->
+    <button class="hamburger-btn" id="hamburger-btn" aria-label="Menú" onclick="toggleMobileMenu()">
+      ☰
+    </button>
+
+    <!-- Menú móvil desplegable -->
+    <div class="mobile-menu" id="mobile-menu">
+      <button onclick="scrollToSection('proyectos'); toggleMobileMenu();" class="text-sm text-[var(--neon-blue)] hover:text-white transition font-mono border border-[var(--neon-blue)]/30 px-3 py-2 rounded hover:bg-[var(--neon-blue)]/10 text-left">
+        🚀 Proyectos
+      </button>
+      <button onclick="scrollToSection('terminal-section'); toggleMobileMenu();" class="text-sm text-[var(--neon-purple)] hover:text-white transition font-mono border border-[var(--neon-purple)]/30 px-3 py-2 rounded hover:bg-[var(--neon-purple)]/10 text-left">
+        💻 Terminal
+      </button>
+      <button onclick="showEmpanadaAlert(); toggleMobileMenu();" class="text-sm text-[var(--neon-pink)] hover:text-white transition font-mono border border-[var(--neon-pink)]/30 px-3 py-2 rounded hover:bg-[var(--neon-pink)]/10 text-left">
+        🥟 Empanada
+      </button>
+      <button onclick="scrollToSection('sobre-mi'); toggleMobileMenu();" class="text-sm text-gray-400 hover:text-white transition font-mono border border-gray-500/30 px-3 py-2 rounded hover:bg-gray-500/10 text-left">
+        👤 Sobre mí
+      </button>
+      <button onclick="scrollToSection('galeria'); toggleMobileMenu();" class="text-sm text-gray-400 hover:text-white transition font-mono border border-gray-500/30 px-3 py-2 rounded hover:bg-gray-500/10 text-left">
+        🖥️ Setup
+      </button>
+    </div>
   </header>
 
   <div class="content-wrapper relative z-10">
 
+    <!-- Hero -->
     <section id="hero" class="min-h-screen flex flex-col items-center justify-center relative px-4 pt-28 pb-20">
       <div class="absolute top-10 left-10 text-[var(--neon-blue)] opacity-40 text-6xl hidden lg:block">╔═══</div>
       <div class="absolute top-10 right-10 text-[var(--neon-blue)] opacity-40 text-6xl hidden lg:block">═══╗</div>
@@ -249,7 +551,7 @@
         </p>
       </div>
 
-      <div class="flex flex-wrap gap-4 z-10 justify-center">
+      <div class="flex flex-wrap gap-4 z-10 justify-center hero-buttons">
         <button onclick="scrollToSection('proyectos')"
           class="group relative px-8 py-3 bg-transparent border-2 border-[var(--neon-blue)] text-[var(--neon-blue)] font-mono font-bold rounded overflow-hidden transition-all duration-300 hover:bg-[var(--neon-blue)]/10 hover:shadow-[0_0_30px_rgba(0,212,255,0.5)]">
           <span class="relative z-10">🚀 VER PROYECTOS</span>
@@ -273,6 +575,7 @@
       <div class="absolute top-1/2 right-[8%] text-3xl animate-float-slow opacity-70 hidden md:block cursor-pointer select-none" onclick="showFloatingEmpanadaAlert()">🥟</div>
     </section>
 
+    <!-- Sobre mí -->
     <section id="sobre-mi" class="py-20 px-4 md:px-10 lg:px-20 relative">
       <div class="max-w-5xl mx-auto">
         <div class="flex items-center gap-4 mb-12">
@@ -297,7 +600,7 @@
             </div>
           </div>
           <div class="border-glow-purple rounded-lg p-6 bg-black/40 backdrop-blur-sm font-mono text-xs md:text-sm text-[var(--neon-purple)]/70 leading-tight overflow-hidden">
-            <pre class="select-none">
+            <pre class="ascii-art select-none">
         ╔════════════════════════════════╗
         ║    ▄▄▄▄▄▄▄   ▄▄▄▄▄▄▄          ║
         ║    █ YacaloX █                ║
@@ -319,6 +622,7 @@
       </div>
     </section>
 
+    <!-- Proyectos -->
     <section id="proyectos" class="py-20 px-4 md:px-10 lg:px-20 relative">
       <div class="max-w-6xl mx-auto">
         <div class="flex items-center gap-4 mb-12">
@@ -328,24 +632,29 @@
           <div class="flex-1 h-px bg-gradient-to-r from-[var(--neon-purple)] to-transparent ml-4"></div>
         </div>
         <div class="grid md:grid-cols-3 gap-6">
+          <!-- Proyecto 1 -->
           <div class="card-3d group border-glow rounded-xl p-6 bg-black/50 backdrop-blur-sm cursor-pointer transition-all duration-300 hover:-translate-y-2 relative overflow-hidden" onmousemove="tiltCard(this, event)" onmouseleave="resetTilt(this)">
             <div class="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-[var(--neon-blue)] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
             <div class="text-4xl mb-3">🤖</div><h3 class="text-xl font-bold text-white mb-2">Chaos WA Ultimate</h3><p class="text-gray-400 text-sm mb-4">Automatización de WhatsApp con respuestas aleatorias, stickers cursed y función de auto-sabotaje.</p>
             <div class="flex gap-2 flex-wrap"><span class="px-2 py-0.5 text-xs bg-[var(--neon-blue)]/10 text-[var(--neon-blue)] rounded">Python</span><span class="px-2 py-0.5 text-xs bg-[var(--neon-purple)]/10 text-[var(--neon-purple)] rounded">Ollama</span></div>
-            <button onclick="https://github.com/YacaloX/Chaos-WA-Ultimate" class="mt-4 w-full py-2 border border-[var(--neon-pink)]/50 text-[var(--neon-pink)] rounded font-mono text-sm hover:bg-[var(--neon-pink)]/10 transition-colors">Ir al Proyecto</button>
+            <a href="https://github.com/YacaloX/Chaos-WA-Ultimate" target="_blank" rel="noopener" class="mt-4 w-full py-2 border border-[var(--neon-pink)]/50 text-[var(--neon-pink)] rounded font-mono text-sm hover:bg-[var(--neon-pink)]/10 transition-colors inline-block text-center">Ir al Proyecto</a>
             <div class="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-[var(--neon-purple)] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
           </div>
+
+          <!-- Proyecto 2 -->
           <div class="card-3d group border-glow rounded-xl p-6 bg-black/50 backdrop-blur-sm cursor-pointer transition-all duration-300 hover:-translate-y-2 relative overflow-hidden" onmousemove="tiltCard(this, event)" onmouseleave="resetTilt(this)">
             <div class="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-[var(--neon-purple)] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-            <div class="text-4xl mb-3">🧠</div><h3 class="text-xl font-bold text-white mb-2">Epicuro de Samos</h3><p class="text-gray-400 text-sm mb-4">Pagina Web que habla sobre la filosofía de Epicuro de Samos</p>
-            <div class="flex gap-2 flex-wrap"><span class="px-2 py-0.5 text-xs bg-[var(--neon-purple)]/10 text-[var(--neon-yellow)] rounded">HTML</span><span class="px-2 py-0.5 text-xs bg-green-500/10 text-green-400 rounded">CSS</span></div>
-            <button onclick="https://github.com/YacaloX/Epicuro-de-Samos" class="mt-4 w-full py-2 border border-[var(--neon-pink)]/50 text-[var(--neon-pink)] rounded font-mono text-sm hover:bg-[var(--neon-pink)]/10 transition-colors">Ir al Proyecto</button>
+            <div class="text-4xl mb-3">🧠</div><h3 class="text-xl font-bold text-white mb-2">Epicuro de Samos</h3><p class="text-gray-400 text-sm mb-4">Página Web que habla sobre la filosofía de Epicuro de Samos</p>
+            <div class="flex gap-2 flex-wrap"><span class="px-2 py-0.5 text-xs bg-[var(--neon-yellow)]/10 text-[var(--neon-yellow)] rounded">HTML</span><span class="px-2 py-0.5 text-xs bg-green-500/10 text-green-400 rounded">CSS</span></div>
+            <a href="https://github.com/YacaloX/Epicuro-de-Samos" target="_blank" rel="noopener" class="mt-4 w-full py-2 border border-[var(--neon-pink)]/50 text-[var(--neon-pink)] rounded font-mono text-sm hover:bg-[var(--neon-pink)]/10 transition-colors inline-block text-center">Ir al Proyecto</a>
             <div class="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-[var(--neon-blue)] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
           </div>
+
+          <!-- Proyecto 3 -->
           <div class="card-3d group border-glow rounded-xl p-6 bg-black/50 backdrop-blur-sm cursor-pointer transition-all duration-300 hover:-translate-y-2 relative overflow-hidden" onmousemove="tiltCard(this, event)" onmouseleave="resetTilt(this)">
             <div class="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-[var(--neon-pink)] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
             <div class="text-4xl mb-3">⛏️</div><h3 class="text-xl font-bold text-white mb-2">Cosas en Desarrollo</h3><p class="text-gray-400 text-sm mb-4">Proyectos raros que tengo guardados en el disco pero no funcionan o no funcionan</p>
-            <div class="flex gap-2 flex-wrap"><span class="px-2 py-0.5 text-xs bg-orange-500/10 text-orange-400 rounded">I don't Know</span><span class="px-2 py-0.5 text-xs bg-red-500/10 text-red-400 rounded">I don't Renember</span></div>
+            <div class="flex gap-2 flex-wrap"><span class="px-2 py-0.5 text-xs bg-orange-500/10 text-orange-400 rounded">I don't Know</span><span class="px-2 py-0.5 text-xs bg-red-500/10 text-red-400 rounded">I don't Remember</span></div>
             <button onclick="showDoNotPressAlert()" class="mt-4 w-full py-2 border border-[var(--neon-pink)]/50 text-[var(--neon-pink)] rounded font-mono text-sm hover:bg-[var(--neon-pink)]/10 transition-colors">DO NOT PRESS</button>
             <div class="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-[var(--neon-purple)] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
           </div>
@@ -353,6 +662,7 @@
       </div>
     </section>
 
+    <!-- Terminal -->
     <section id="terminal-section" class="py-20 px-4 md:px-10 lg:px-20 relative">
       <div class="max-w-4xl mx-auto">
         <div class="flex items-center gap-4 mb-8">
@@ -360,19 +670,20 @@
           <h2 class="text-3xl md:text-4xl font-bold text-green-400 font-mono tracking-wide">TERMINAL</h2>
           <div class="flex-1 h-px bg-gradient-to-r from-green-400 to-transparent ml-4"></div>
         </div>
-        <div id="terminal-body" class="rounded-lg p-4 text-green-300 text-sm md:text-base overflow-y-auto h-80 flex flex-col">
-          <div id="terminal-output" class="flex-1 space-y-1">
+        <div id="terminal-body" class="rounded-lg p-4 text-green-300 text-sm md:text-base">
+          <div id="terminal-output" class="space-y-1">
             <p>> Bienvenido a la terminal del caos. Escribe <span class="text-white">help</span> para comandos.</p>
           </div>
-          <div class="flex items-center mt-2">
+          <div class="flex items-center mt-2 pt-2 border-t border-green-500/20">
             <span class="text-green-400 mr-2">❯</span>
-            <input type="text" id="terminal-input" class="flex-1 bg-transparent outline-none text-green-300 font-mono" placeholder="Escribe un comando...">
+            <input type="text" id="terminal-input" class="flex-1 bg-transparent outline-none text-green-300 font-mono text-sm md:text-base" placeholder="Escribe un comando..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
           </div>
         </div>
-        <p class="text-xs text-gray-500 mt-2 font-mono">Comandos: whoami, projects, chaos, insanity, github, coffee, help, clear</p>
+        <p class="text-xs text-gray-500 mt-2 font-mono">Comandos: whoami, projects, chaos, insanity, github, coffee, help, clear, status</p>
       </div>
     </section>
 
+    <!-- Estadísticas -->
     <section id="estadisticas" class="py-20 px-4 md:px-10 lg:px-20 relative">
       <div class="max-w-5xl mx-auto">
         <div class="flex items-center gap-4 mb-12">
@@ -390,6 +701,7 @@
       </div>
     </section>
 
+    <!-- Galería / Setup -->
     <section id="galeria" class="py-20 px-4 md:px-10 lg:px-20 relative">
       <div class="max-w-6xl mx-auto">
         <div class="flex items-center gap-4 mb-12">
@@ -409,6 +721,7 @@
       </div>
     </section>
 
+    <!-- Footer -->
     <footer class="py-12 border-t border-[var(--neon-blue)]/20 text-center relative">
       <p class="text-xl font-mono text-[var(--neon-blue)] neon-glow-blue">« Si no explotó, le falta personalidad. »</p>
       <p class="text-sm text-gray-500 mt-2">Powered by caos y café. © YacaloX 2025</p>
@@ -420,7 +733,7 @@
   </div>
 
   <script>
-    // Funciones para los alerts (evita escapes problemáticos en el HTML)
+    // Alertas divertidas
     function showEmpanadaAlert() {
       alert('🥟 ¡EMPANADA DE CAOS!\n\nRellena de código picante, queso cuántico y carne de bug.\n\n¿Desea ordenar? (sí/no)\n> ERROR: Pedido excede límites de realidad.');
     }
@@ -430,71 +743,106 @@
     function showFloatingEmpanadaAlert() {
       alert('🥟 Empanada cósmica flotante. Contiene caos puro.');
     }
+
+    // Scroll suave
     function scrollToSection(id) {
-      document.getElementById(id).scrollIntoView({behavior:'smooth'});
+      const el = document.getElementById(id);
+      if (el) el.scrollIntoView({ behavior: 'smooth' });
     }
 
-    // Partículas
+    // Menú móvil
+    function toggleMobileMenu() {
+      const menu = document.getElementById('mobile-menu');
+      const btn = document.getElementById('hamburger-btn');
+      if (menu && btn) {
+        menu.classList.toggle('open');
+        btn.textContent = menu.classList.contains('open') ? '✕' : '☰';
+      }
+    }
+
+    // Cerrar menú móvil al hacer clic fuera
+    document.addEventListener('click', function(e) {
+      const menu = document.getElementById('mobile-menu');
+      const btn = document.getElementById('hamburger-btn');
+      if (menu && btn && !menu.contains(e.target) && !btn.contains(e.target)) {
+        menu.classList.remove('open');
+        btn.textContent = '☰';
+      }
+    });
+
+    // Partículas del fondo (adaptativas)
     (function() {
       const canvas = document.getElementById('particles-canvas');
       const ctx = canvas.getContext('2d');
       let width, height, particles = [];
-      const columns = Math.floor(window.innerWidth / 20) + 1;
+      let columns;
+
+      function getColumns() {
+        if (window.innerWidth < 480) return Math.floor(window.innerWidth / 30) + 1;
+        if (window.innerWidth < 768) return Math.floor(window.innerWidth / 25) + 1;
+        return Math.floor(window.innerWidth / 20) + 1;
+      }
 
       function resize() {
         width = window.innerWidth;
         height = window.innerHeight;
         canvas.width = width;
         canvas.height = height;
+        columns = getColumns();
         initParticles();
       }
+
       function initParticles() {
         particles = [];
         for (let i = 0; i < columns; i++) {
           particles.push({
-            x: i * 20 + Math.random() * 10,
+            x: i * (width / columns) + Math.random() * 10,
             y: Math.random() * height,
-            speed: 1 + Math.random() * 3,
+            speed: 0.8 + Math.random() * 2.5,
             chars: '01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン'.split(''),
             char: '',
-            opacity: Math.random() * 0.5 + 0.2
+            opacity: Math.random() * 0.4 + 0.15
           });
         }
       }
+
       function drawParticles() {
         ctx.clearRect(0, 0, width, height);
-        ctx.font = '14px monospace';
+        ctx.font = (window.innerWidth < 480 ? '10px' : '14px') + ' monospace';
         particles.forEach(p => {
           p.char = p.chars[Math.floor(Math.random() * p.chars.length)];
           ctx.fillStyle = `rgba(0, 212, 255, ${p.opacity})`;
           ctx.fillText(p.char, p.x, p.y);
           p.y += p.speed;
-          if (p.y > height) {
-            p.y = -10;
-            p.x = (Math.floor(Math.random() * columns)) * 20 + Math.random() * 10;
+          if (p.y > height + 20) {
+            p.y = -20;
+            p.x = Math.random() * width;
           }
         });
         requestAnimationFrame(drawParticles);
       }
+
       window.addEventListener('resize', resize);
       resize();
       drawParticles();
     })();
 
-    // Tilt 3D
+    // Efecto 3D en tarjetas (solo desktop)
     window.tiltCard = function(card, event) {
+      if (window.innerWidth < 768) return; // desactivar en móvil
       const rect = card.getBoundingClientRect();
       const x = event.clientX - rect.left;
       const y = event.clientY - rect.top;
-      const rotateX = ((y - rect.height/2) / (rect.height/2)) * -8;
-      const rotateY = ((x - rect.width/2) / (rect.width/2)) * 8;
+      const rotateX = ((y - rect.height / 2) / (rect.height / 2)) * -8;
+      const rotateY = ((x - rect.width / 2) / (rect.width / 2)) * 8;
       card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02,1.02,1.02)`;
     };
+
     window.resetTilt = function(card) {
       card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1,1,1)';
     };
 
-    // Terminal
+    // Terminal interactiva
     const termOut = document.getElementById('terminal-output');
     const termIn = document.getElementById('terminal-input');
     const cmds = {
@@ -508,13 +856,16 @@
       status: () => 'Sistema: operativo. Caos: estable. Café: crítico. Sueño: ausente.',
       clear: () => { termOut.innerHTML = ''; return ''; }
     };
+
     function addLine(txt, cls = 'text-green-300') {
       const p = document.createElement('p');
       p.className = cls;
       p.textContent = txt;
       termOut.appendChild(p);
-      termOut.parentElement.scrollTop = termOut.parentElement.scrollHeight;
+      // Scroll al final del output
+      termOut.scrollTop = termOut.scrollHeight;
     }
+
     termIn.addEventListener('keydown', function(e) {
       if (e.key === 'Enter') {
         const cmd = this.value.trim().toLowerCase();
@@ -527,6 +878,15 @@
           addLine(`Comando no reconocido: ${cmd}. Prueba "help".`, 'text-red-400');
         }
         this.value = '';
+        // Mantener el foco en el input
+        this.focus();
+      }
+    });
+
+    // Mantener el foco en el input al hacer clic en la terminal
+    document.getElementById('terminal-body').addEventListener('click', function(e) {
+      if (e.target !== termIn) {
+        termIn.focus();
       }
     });
   </script>
