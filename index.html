@@ -369,6 +369,110 @@
       max-width: 100%;
     }
 
+    /* Widget contador flotante */
+    #chaos-counter-widget {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 100;
+      background: rgba(0, 0, 0, 0.85);
+      border: 1px solid var(--neon-pink);
+      border-radius: 12px;
+      padding: 12px 16px;
+      font-family: 'Courier New', monospace;
+      box-shadow: 0 0 20px rgba(255, 45, 149, 0.4);
+      backdrop-filter: blur(8px);
+      user-select: none;
+      cursor: pointer;
+      transition: all 0.3s;
+      min-width: 160px;
+    }
+
+    #chaos-counter-widget:hover {
+      box-shadow: 0 0 40px rgba(255, 45, 149, 0.8);
+      transform: scale(1.05);
+    }
+
+    #chaos-counter-widget .widget-title {
+      font-size: 0.65rem;
+      color: var(--neon-pink);
+      text-align: center;
+      margin-bottom: 4px;
+      letter-spacing: 1px;
+    }
+
+    #chaos-counter-widget .widget-stats {
+      display: flex;
+      justify-content: space-around;
+      gap: 12px;
+    }
+
+    #chaos-counter-widget .stat {
+      text-align: center;
+    }
+
+    #chaos-counter-widget .stat-value {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: var(--neon-yellow);
+      text-shadow: 0 0 8px var(--neon-yellow);
+    }
+
+    #chaos-counter-widget .stat-label {
+      font-size: 0.55rem;
+      color: #aaa;
+      text-transform: uppercase;
+    }
+
+    /* BSOD Overlay */
+    #bsod-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #0000aa;
+      color: #ffffff;
+      font-family: 'Courier New', 'Lucida Console', monospace;
+      z-index: 99999;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px;
+      text-align: center;
+      cursor: pointer;
+    }
+
+    #bsod-overlay.active {
+      display: flex;
+    }
+
+    #bsod-overlay .bsod-title {
+      background: #aaaaaa;
+      color: #0000aa;
+      padding: 2px 8px;
+      font-weight: bold;
+      font-size: 1rem;
+      margin-bottom: 30px;
+    }
+
+    #bsod-overlay .bsod-emoji {
+      font-size: 5rem;
+      margin-bottom: 20px;
+    }
+
+    #bsod-overlay .bsod-error {
+      font-size: 0.9rem;
+      line-height: 1.6;
+      max-width: 700px;
+    }
+
+    #bsod-overlay .bsod-progress {
+      margin-top: 30px;
+      font-size: 0.8rem;
+    }
+
     @media (max-width: 768px) {
       .glitch-text {
         font-size: 3.5rem !important;
@@ -394,8 +498,15 @@
         display: block;
       }
 
-      .particle-density {
-        display: none;
+      #chaos-counter-widget {
+        bottom: 10px;
+        right: 10px;
+        padding: 8px 12px;
+        min-width: 130px;
+      }
+
+      #chaos-counter-widget .stat-value {
+        font-size: 1rem;
       }
     }
 
@@ -425,6 +536,13 @@
       .hero-buttons a {
         width: 100%;
         text-align: center;
+      }
+
+      #chaos-counter-widget {
+        bottom: 8px;
+        right: 8px;
+        padding: 6px 10px;
+        min-width: 110px;
       }
     }
 
@@ -460,6 +578,35 @@
 
   <canvas id="particles-canvas"></canvas>
 
+  <!-- BSOD Overlay -->
+  <div id="bsod-overlay" onclick="closeBSOD()">
+    <div class="bsod-title">*** STOP: 0x0000CA05 (0xCHAOS_LEVEL_EXCEEDED) ***</div>
+    <div class="bsod-emoji">💀</div>
+    <div class="bsod-error">
+      Se ha detectado un nivel de caos inaceptable en el sistema.<br>
+      El proceso "sanity.exe" ha dejado de funcionar.<br><br>
+      Si es la primera vez que ve esta pantalla, no se preocupe, es normal.<br>
+      Reinicie el universo o presione cualquier tecla para continuar...<br><br>
+      *** YacaloX.sys - Address FFFFFFFF base at C0000000, DateStamp 36b8c0d1 ***
+    </div>
+    <div class="bsod-progress">Volcado de memoria física: <span id="bsod-progress-text">0%</span></div>
+  </div>
+
+  <!-- Widget contador flotante -->
+  <div id="chaos-counter-widget" onclick="toggleWidgetSound()" title="Click para silenciar/activar sonidos del widget">
+    <div class="widget-title">🧪 CAOS EN VIVO</div>
+    <div class="widget-stats">
+      <div class="stat">
+        <div class="stat-value" id="coffee-counter">∞</div>
+        <div class="stat-label">☕ Café</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value" id="empanada-counter">∞</div>
+        <div class="stat-label">🥟 Empanadas</div>
+      </div>
+    </div>
+  </div>
+
   <!-- Header con menú hamburguesa -->
   <header class="fixed top-0 left-0 w-full z-50 bg-black/70 backdrop-blur-md border-b border-[var(--neon-blue)]/20 px-4 py-3 flex items-center justify-between">
     <div class="flex items-center gap-2">
@@ -469,7 +616,7 @@
       <span class="text-lg font-bold text-[var(--neon-blue)] neon-glow-blue font-mono tracking-wider hidden sm:inline">YacaloX</span>
     </div>
 
-    <!-- Navegación escritorio -->
+    <!-- Navegación escritorio + botón sonido -->
     <div class="desktop-nav flex items-center gap-3 flex-wrap">
       <button onclick="scrollToSection('proyectos')" class="text-xs text-[var(--neon-blue)] hover:text-white transition font-mono border border-[var(--neon-blue)]/30 px-3 py-1 rounded hover:bg-[var(--neon-blue)]/10">
         🚀 Proyectos
@@ -479,6 +626,10 @@
       </button>
       <button onclick="showEmpanadaAlert()" class="text-xs text-[var(--neon-pink)] hover:text-white transition font-mono border border-[var(--neon-pink)]/30 px-3 py-1 rounded hover:bg-[var(--neon-pink)]/10 flex items-center gap-1">
         🥟 Empanada
+      </button>
+      <!-- Botón de sonido -->
+      <button id="sound-toggle-btn" onclick="toggleSound()" class="text-xs text-yellow-400 hover:text-white transition font-mono border border-yellow-400/30 px-3 py-1 rounded hover:bg-yellow-400/10 flex items-center gap-1" title="Activar/Desactivar sonidos glitch">
+        🔊
       </button>
     </div>
 
@@ -503,6 +654,9 @@
       </button>
       <button onclick="scrollToSection('galeria'); toggleMobileMenu();" class="text-sm text-gray-400 hover:text-white transition font-mono border border-gray-500/30 px-3 py-2 rounded hover:bg-gray-500/10 text-left">
         🖥️ Setup
+      </button>
+      <button onclick="toggleSound(); toggleMobileMenu();" class="text-sm text-yellow-400 hover:text-white transition font-mono border border-yellow-400/30 px-3 py-2 rounded hover:bg-yellow-400/10 text-left" id="sound-toggle-mobile">
+        🔊 Sonido
       </button>
     </div>
   </header>
@@ -563,7 +717,8 @@
           <span class="absolute inset-0 bg-[var(--neon-purple)]/10 translate-x-[-100%] group-hover:translate-x-0 transition-transform duration-500"></span>
         </button>
         <button onclick="showDoNotPressAlert()"
-          class="group relative px-8 py-3 bg-transparent border-2 border-[var(--neon-pink)] text-[var(--neon-pink)] font-mono font-bold rounded overflow-hidden transition-all duration-300 hover:bg-red-900/20 hover:shadow-[0_0_30px_rgba(255,45,149,0.5)] shake-on-hover">
+          class="group relative px-8 py-3 bg-transparent border-2 border-[var(--neon-pink)] text-[var(--neon-pink)] font-mono font-bold rounded overflow-hidden transition-all duration-300 hover:bg-red-900/20 hover:shadow-[0_0_30px_rgba(255,45,149,0.5)] shake-on-hover"
+          onmouseenter="playGlitchSound()">
           <span class="relative z-10">⚠️ DO NOT PRESS</span>
           <span class="absolute inset-0 bg-red-500/5 animate-pulse"></span>
         </button>
@@ -679,7 +834,7 @@
             <input type="text" id="terminal-input" class="flex-1 bg-transparent outline-none text-green-300 font-mono text-sm md:text-base" placeholder="Escribe un comando..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
           </div>
         </div>
-        <p class="text-xs text-gray-500 mt-2 font-mono">Comandos: whoami, projects, chaos, insanity, github, coffee, help, clear, status</p>
+        <p class="text-xs text-gray-500 mt-2 font-mono">Comandos: whoami, projects, chaos, insanity, github, coffee, help, clear, status, matrix, sudo, empanada, bsod, devmode</p>
       </div>
     </section>
 
@@ -729,18 +884,217 @@
         [ system.uptime: 127h 33m | chaos.level: acceptable | sanity: not found ]
       </div>
       <div class="mt-2 cursor-pointer select-none" onclick="alert('🥚 Easter Egg: ¡Has encontrado el caos supremo! Escribe "coffee" en la terminal.')">🔍</div>
+      <!-- Botón oculto BSOD -->
+      <div class="mt-4">
+        <button onclick="triggerBSOD()" class="text-xs text-gray-700 hover:text-red-500 transition font-mono border border-gray-800 px-3 py-1 rounded hover:border-red-900/30 opacity-30 hover:opacity-100">
+          💀 BSOD SIMULATOR
+        </button>
+      </div>
     </footer>
   </div>
 
   <script>
-    // Alertas divertidas
+    // ==================== SISTEMA DE SONIDO (Web Audio API) ====================
+    let audioCtx = null;
+    let soundEnabled = true;
+
+    function initAudio() {
+      if (!audioCtx) {
+        try {
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        } catch(e) {
+          console.log('Audio no soportado');
+        }
+      }
+      // Reanudar contexto si está suspendido (política de autoplay)
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+
+    // Sonido glitch corto (ruido blanco modulado)
+    function playGlitchSound(duration = 0.15, volume = 0.08) {
+      if (!soundEnabled) return;
+      initAudio();
+      if (!audioCtx) return;
+      try {
+        const now = audioCtx.currentTime;
+        const bufferSize = Math.floor(audioCtx.sampleRate * duration);
+        const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+        const data = buffer.getChannelData(0);
+
+        // Generar ruido blanco con modulación de amplitud para efecto glitch
+        for (let i = 0; i < bufferSize; i++) {
+          const t = i / audioCtx.sampleRate;
+          const am = 0.5 + 0.5 * Math.sin(t * 200 * Math.PI); // modulación rápida
+          data[i] = (Math.random() * 2 - 1) * am * Math.min(1, (duration - t) * 20); // fade out rápido
+        }
+
+        const source = audioCtx.createBufferSource();
+        source.buffer = buffer;
+
+        // Filtro pasa-bajos para que no sea tan agresivo
+        const filter = audioCtx.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.frequency.value = 2000 + Math.random() * 3000;
+
+        const gain = audioCtx.createGain();
+        gain.gain.setValueAtTime(volume, now);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+
+        source.connect(filter);
+        filter.connect(gain);
+        gain.connect(audioCtx.destination);
+        source.start(now);
+        source.stop(now + duration);
+      } catch(e) {
+        // Silencioso
+      }
+    }
+
+    // Sonido de tecla de terminal (click corto)
+    function playKeySound() {
+      if (!soundEnabled) return;
+      initAudio();
+      if (!audioCtx) return;
+      try {
+        const now = audioCtx.currentTime;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(800 + Math.random() * 400, now);
+        osc.frequency.exponentialRampToValueAtTime(100, now + 0.05);
+        gain.gain.setValueAtTime(0.04, now);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.05);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(now);
+        osc.stop(now + 0.05);
+      } catch(e) {}
+    }
+
+    // Sonido de error/BSOD
+    function playErrorSound() {
+      if (!soundEnabled) return;
+      initAudio();
+      if (!audioCtx) return;
+      try {
+        const now = audioCtx.currentTime;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(150, now);
+        osc.frequency.linearRampToValueAtTime(40, now + 1.5);
+        gain.gain.setValueAtTime(0.1, now);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 1.5);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(now);
+        osc.stop(now + 1.5);
+      } catch(e) {}
+    }
+
+    function toggleSound() {
+      soundEnabled = !soundEnabled;
+      const btns = document.querySelectorAll('#sound-toggle-btn, #sound-toggle-mobile');
+      btns.forEach(b => {
+        if (b) {
+          b.innerHTML = soundEnabled ? '🔊' : '🔇';
+          b.style.color = soundEnabled ? '' : '#ff4444';
+        }
+      });
+      // Reproducir sonido de confirmación
+      if (soundEnabled) playKeySound();
+    }
+
+    // ==================== BSOD (Pantalla Azul de la Muerte) ====================
+    let bsodActive = false;
+    let bsodTimer = null;
+
+    function triggerBSOD() {
+      if (bsodActive) return;
+      bsodActive = true;
+      const overlay = document.getElementById('bsod-overlay');
+      overlay.classList.add('active');
+      playErrorSound();
+
+      // Animación de progreso de volcado de memoria
+      const progressText = document.getElementById('bsod-progress-text');
+      let progress = 0;
+      const interval = setInterval(() => {
+        progress += Math.floor(Math.random() * 15) + 1;
+        if (progress > 100) progress = 100;
+        progressText.textContent = progress + '%';
+        if (progress >= 100) {
+          clearInterval(interval);
+          progressText.textContent = 'COMPLETO (pero no sirvió de nada)';
+        }
+      }, 200);
+
+      // Auto-cerrar después de 4 segundos
+      bsodTimer = setTimeout(() => {
+        closeBSOD();
+      }, 4000);
+    }
+
+    function closeBSOD() {
+      if (!bsodActive) return;
+      bsodActive = false;
+      const overlay = document.getElementById('bsod-overlay');
+      overlay.classList.remove('active');
+      document.getElementById('bsod-progress-text').textContent = '0%';
+      if (bsodTimer) clearTimeout(bsodTimer);
+      playGlitchSound(0.1, 0.05);
+    }
+
+    // Cerrar BSOD con tecla Escape
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && bsodActive) {
+        closeBSOD();
+      }
+    });
+
+    // ==================== WIDGET CONTADOR FLOTANTE ====================
+    let widgetCoffeeCount = 847;
+    let widgetEmpanadaCount = 392;
+    let widgetInterval = null;
+
+    function updateWidgetCounters() {
+      widgetCoffeeCount += Math.floor(Math.random() * 3);
+      widgetEmpanadaCount += Math.floor(Math.random() * 2) + (Math.random() > 0.7 ? 1 : 0);
+
+      const coffeeEl = document.getElementById('coffee-counter');
+      const empanadaEl = document.getElementById('empanada-counter');
+
+      if (coffeeEl) coffeeEl.textContent = widgetCoffeeCount.toLocaleString();
+      if (empanadaEl) empanadaEl.textContent = widgetEmpanadaCount.toLocaleString();
+    }
+
+    function startWidgetCounter() {
+      if (widgetInterval) clearInterval(widgetInterval);
+      updateWidgetCounters(); // inicial
+      widgetInterval = setInterval(updateWidgetCounters, 2000 + Math.random() * 3000);
+    }
+
+    function toggleWidgetSound() {
+      // Clic en el widget = toggle rápido de sonido
+      toggleSound();
+      playGlitchSound(0.08, 0.03);
+    }
+
+    startWidgetCounter();
+
+    // ==================== ALERTAS DIVERTIDAS ====================
     function showEmpanadaAlert() {
+      playGlitchSound(0.2, 0.06);
       alert('🥟 ¡EMPANADA DE CAOS!\n\nRellena de código picante, queso cuántico y carne de bug.\n\n¿Desea ordenar? (sí/no)\n> ERROR: Pedido excede límites de realidad.');
     }
     function showDoNotPressAlert() {
+      playErrorSound();
       alert('🛑 ¡ERROR!\n\nEste botón no debería existir.\nEl universo acaba de dividirse en dos realidades paralelas.\nEn una de ellas, hiciste clic. En la otra, no.\n\nAmbas están decepcionadas.');
     }
     function showFloatingEmpanadaAlert() {
+      playGlitchSound(0.1, 0.05);
       alert('🥟 Empanada cósmica flotante. Contiene caos puro.');
     }
 
@@ -757,6 +1111,7 @@
       if (menu && btn) {
         menu.classList.toggle('open');
         btn.textContent = menu.classList.contains('open') ? '✕' : '☰';
+        playKeySound();
       }
     }
 
@@ -829,7 +1184,7 @@
 
     // Efecto 3D en tarjetas (solo desktop)
     window.tiltCard = function(card, event) {
-      if (window.innerWidth < 768) return; // desactivar en móvil
+      if (window.innerWidth < 768) return;
       const rect = card.getBoundingClientRect();
       const x = event.clientX - rect.left;
       const y = event.clientY - rect.top;
@@ -842,44 +1197,113 @@
       card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1,1,1)';
     };
 
-    // Terminal interactiva
+    // ==================== TERMINAL INTERACTIVA (EXPANDIDA) ====================
     const termOut = document.getElementById('terminal-output');
     const termIn = document.getElementById('terminal-input');
     const cmds = {
-      help: () => 'Comandos: whoami, projects, chaos, insanity, github, coffee, clear, status',
+      help: () => 'Comandos: whoami, projects, chaos, insanity, github, coffee, clear, status, matrix, sudo, empanada, bsod, devmode, hack, scream',
       whoami: () => 'Eres YacaloX, ingeniero del caos digital. O al menos eso dice el sistema.',
       projects: () => 'Proyectos activos: Chaos WA Ultimate, Bots multiagente, Mods de Minecraft (todos en estado "funciona, pero no preguntes cómo").',
       chaos: () => 'Nivel de caos actual: 97%. Recomendación: no tocar nada.',
       insanity: () => 'Modo locura activado. Las IAs están debatiendo sobre la existencia del pollo frito.',
       github: () => 'Repositorio: github.com/YacaloX (tal vez exista, tal vez no).',
-      coffee: () => '☕ ¡café detectado! Recargando energía... (mentira, nunca es suficiente).',
+      coffee: () => '☕ ¡café detectado! Recargando energía... (mentira, nunca es suficiente). Widget actualizado.',
       status: () => 'Sistema: operativo. Caos: estable. Café: crítico. Sueño: ausente.',
       devmode: () => '==MODO DESARROLLADOR== failure: please enter to your account to modify the webpage',
+      matrix: () => {
+        // Mini efecto matrix en la terminal
+        let output = '';
+        const chars = '01アイウエオ';
+        for (let i = 0; i < 8; i++) {
+          let line = '';
+          for (let j = 0; j < 30; j++) {
+            line += chars[Math.floor(Math.random() * chars.length)] + ' ';
+          }
+          output += line + '\n';
+        }
+        output += '... MATRIX MODE: ON (solo en tu imaginación)';
+        return output;
+      },
+      sudo: (args) => {
+        const fullCmd = args ? args.join(' ') : '';
+        if (fullCmd.includes('rm -rf')) {
+          playErrorSound();
+          return '💀 Nice try. El caos tiene límites... por ahora.\n"sudo rm -rf /" está deshabilitado por el bien de la humanidad.';
+        }
+        return 'Acceso denegado. Ni siquiera YacaloX tiene permisos de root aquí.';
+      },
+      empanada: (args) => {
+        if (args && args.includes('--receta')) {
+          return `🥟 RECETA DE EMPANADA CUÁNTICA:
+- 500g de harina de bugs compilados
+- 200g de queso cuántico (en superposición de derretido/sólido)
+- 3 IAs picadas finamente
+- 1 taza de café negro (para el cocinero, no para la masa)
+- Especias: caos al gusto
+Cocinar a 8000°C durante 3 nanosegundos o 3 horas, dependiendo del observador.`;
+        }
+        return '🥟 ¡Empanada! Usa "empanada --receta" para la receta secreta.';
+      },
+      bsod: () => {
+        setTimeout(() => triggerBSOD(), 500);
+        return '💀 Iniciando secuencia de Pantalla Azul del Caos...';
+      },
+      hack: () => {
+        playGlitchSound(0.3, 0.07);
+        return `[+] Conectando a mainframe de la Matrix...
+[+] Bypasseando firewall cuántico...
+[+] Descargando secretos del universo...
+[+] ERROR: Demasiado caos para procesar.
+[+] Hackeo completado (o no). Nadie lo sabrá jamás.`;
+      },
+      scream: () => {
+        playErrorSound();
+        return '😱 AAAAAAAAAAAAAHHHHHHHHHH!!! (El sistema grita contigo)';
+      },
       clear: () => { termOut.innerHTML = ''; return ''; }
     };
 
     function addLine(txt, cls = 'text-green-300') {
       const p = document.createElement('p');
       p.className = cls;
+      p.style.whiteSpace = 'pre-wrap'; // Para respetar saltos de línea
       p.textContent = txt;
       termOut.appendChild(p);
-      // Scroll al final del output
       termOut.scrollTop = termOut.scrollHeight;
     }
 
     termIn.addEventListener('keydown', function(e) {
       if (e.key === 'Enter') {
-        const cmd = this.value.trim().toLowerCase();
-        if (!cmd) return;
-        addLine(`❯ ${cmd}`, 'text-white');
+        playKeySound();
+        const fullInput = this.value.trim();
+        if (!fullInput) return;
+        addLine(`❯ ${fullInput}`, 'text-white');
+
+        // Parsear comando y argumentos
+        const parts = fullInput.split(/\s+/);
+        const cmd = parts[0].toLowerCase();
+        const args = parts.slice(1);
+
         if (cmds[cmd]) {
-          const res = cmds[cmd]();
+          let res;
+          if (cmd === 'sudo' || cmd === 'empanada') {
+            res = cmds[cmd](args);
+          } else {
+            res = cmds[cmd]();
+          }
           if (res) addLine(res);
         } else {
-          addLine(`Comando no reconocido: ${cmd}. Prueba "help".`, 'text-red-400');
+          // Respuestas aleatorias para comandos desconocidos
+          const randomResponses = [
+            `Comando no reconocido: ${cmd}. Prueba "help".`,
+            `"${cmd}" no es un comando válido. ¿Estás bien?`,
+            `Error 404: Comando "${cmd}" no encontrado. Como mi cordura.`,
+            `El comando "${cmd}" existe en un universo paralelo, pero no en este.`,
+            `Nice try. Pero "${cmd}" no hará que el caos se detenga.`
+          ];
+          addLine(randomResponses[Math.floor(Math.random() * randomResponses.length)], 'text-red-400');
         }
         this.value = '';
-        // Mantener el foco en el input
         this.focus();
       }
     });
@@ -890,6 +1314,24 @@
         termIn.focus();
       }
     });
+
+    // ==================== INICIALIZACIÓN ====================
+    // Hacer que el primer clic en cualquier parte inicie el contexto de audio
+    document.addEventListener('click', function initAudioOnce() {
+      initAudio();
+    }, { once: true });
+
+    // Añadir sonido al hacer hover en el botón DO NOT PRESS
+    document.querySelectorAll('.shake-on-hover').forEach(btn => {
+      btn.addEventListener('mouseenter', () => playGlitchSound(0.1, 0.04));
+    });
+
+    console.log('%c YacaloX %c Caos Digital %c Cargado ',
+      'background:#000;color:#00d4ff;font-size:20px;padding:5px;',
+      'background:#000;color:#b44dff;font-size:20px;padding:5px;',
+      'background:#000;color:#ff2d95;font-size:12px;padding:5px;');
+    console.log('%cAbre la terminal y escribe "help" para comandos ocultos.', 'color:#0f0;');
+    console.log('%cPrueba también: sudo rm -rf /, empanada --receta, matrix, bsod, hack, scream', 'color:#ff0;');
   </script>
 </body>
 </html>
