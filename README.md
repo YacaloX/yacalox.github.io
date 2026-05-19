@@ -2,6 +2,6 @@
 
 Esta es una web simple sobre mi :D
 
-Abre `` [yacalox.github.io](https://yacalox.github.io) `` para verla
+Abre [yacalox.github.io](https://yacalox.github.io) para verla
 
 :D
